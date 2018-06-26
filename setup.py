@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from setuptools import setup
 
-VERSION = '2.0.0'
+VERSION = '0.0.1'
 DESCRIPTION = "PyBloom: A Probabilistic data structure"
 LONG_DESCRIPTION = """
 pybloom is a Python implementation of the bloom filter probabilistic data
@@ -21,8 +21,9 @@ Topic :: Database :: Database Engines/Servers
 Topic :: Software Development :: Libraries :: Python Modules
 """.splitlines()))
 
+
 setup(
-    name="pybloom",
+    name="fvnbloom",
     version=VERSION,
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
@@ -31,11 +32,11 @@ setup(
               'probabilistic', 'set'),
     author="Jay Baird",
     author_email="jay.baird@me.com",
-    url="http://github.com/jaybaird/python-bloomfilter/",
+    url="https://github.com/simplaex/python-bloomfilter/",
     license="MIT License",
     platforms=['any'],
-    test_suite="pybloom.tests",
+    test_suite="tests",
     zip_safe=True,
-    install_requires=['bitarray>=0.3.4'],
-    packages=['pybloom']
+    install_requires=['numpy>=1.14.0'],
+    packages=['fvnbloom']
 )
