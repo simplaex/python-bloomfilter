@@ -4,7 +4,11 @@ import base64
 
 import numpy as np
 
-from numba import jit, njit, int32
+from numba import njit, int32
+
+
+# this is a 1-to-1 translation of our js bloom filters to python
+
 
 @njit(int32(int32))
 def popcnt(v):
@@ -34,11 +38,11 @@ def fnv_mix(a):
 #// Nonstandard variation: this function optionally takes a seed value that is incorporated
 #// into the offset basis. According to http://www.isthe.com/chongo/tech/comp/fnv/index.html
 #// "almost any offset_basis will serve so long as it is non-zero".
-@njit #(int32(int32, int32))
+@njit
 def fnv_1a(v, seed):
     a = 2166136261 ^ seed
 
-    for i in range(0, len(v)):
+    for i in range(len(v)):
         c = v[i]
         d = c & 0xff00
         if d:
@@ -87,12 +91,11 @@ def buckets_union(b1, b2):
     n1 = len(b1)
     n2 = len(b2)
     assert n1 == n2
-    
+
     for i in range(n1):
         b1[i] = b1[i] | b2[i]
-    
-    return b1
 
+    return b1
 
 
 def create_empty(capacity, error_rate=0.001):    
@@ -121,8 +124,13 @@ class BloomFilter(object):
     def _calculate_locations(self, key):
         return bf_calculate_locations(self._locations, self.m, key)
 
+    def _calculate_key(self, key):
+        bkey = key.encode()
+        #bkey = np.frombuffer(bkey, dtype='uint8')
+        return bkey
+
     def test(self, key):
-        key = np.frombuffer(key.encode(), dtype='int32')
+        key = self._calculate_key(key)
         l = self._calculate_locations(key)
         return bf_test(l, self.buckets)
 
@@ -130,7 +138,7 @@ class BloomFilter(object):
         return self.test(key)
 
     def add(self, key):
-        key = np.frombuffer(key.encode(), dtype='int32')
+        key = self._calculate_key(key)
         l = self._calculate_locations(key)
         bf_add(l, self.buckets, key)
 
@@ -138,12 +146,6 @@ class BloomFilter(object):
         assert self.num_hashes == other.num_hashes
         self.buckets = buckets_union(self.buckets, other.buckets)
         return self
-
-    def export(self):
-        return {
-            'num_hashes': self.num_hashes,
-            'buckets': self.buckets,
-        }
 
     def save(self, file):
         save(self.num_hashes, self.buckets, file)
@@ -167,14 +169,3 @@ def load(file):
     buckets = np.frombuffer(base64.b64decode(b64), dtype='int32')
 
     return BloomFilter(d['num_hashes'], buckets)
-
-
-def wrap_exported(exported):
-    return BloomFilter(exported['num_hashes'], exported['buckets'])
-
-
-def merge_exported(exported1, exported2):
-    assert exported1['num_hashes'] == exported2['num_hashes']
-    union = buckets_union(exported1['buckets'], exported2['buckets'])
-    exported1['buckets'] = union
-    return exported1

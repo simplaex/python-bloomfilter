@@ -1,14 +1,14 @@
 import os
 import uuid
 
-import fvnbloom as bfjs
+import fvnbloom
 
 
 def test_add_test():
     total = 1000
     uuids = []
 
-    bf = bfjs.create_empty(capacity=total, error_rate=0.01)
+    bf = fvnbloom.create_empty(capacity=total, error_rate=0.01)
 
     for i in range(total):
         did = uuid.uuid4().hex
@@ -22,7 +22,7 @@ def test_add_test():
 def test_union():
     total = 1000
     strings1 = []
-    bf1 = bfjs.create_empty(capacity=2 * total, error_rate=0.01)
+    bf1 = fvnbloom.create_empty(capacity=2 * total, error_rate=0.01)
 
     for i in range(total):
         did = uuid.uuid4().hex
@@ -30,7 +30,7 @@ def test_union():
         bf1.add(did)
 
     strings2 = []
-    bf2 = bfjs.create_empty(capacity=2 * total, error_rate=0.01)
+    bf2 = fvnbloom.create_empty(capacity=2 * total, error_rate=0.01)
 
     for i in range(total):
         did = uuid.uuid4().hex
@@ -47,7 +47,7 @@ def test_save_load():
     total = 1000
     uuids = []
 
-    bf = bfjs.create_empty(capacity=total, error_rate=0.01)
+    bf = fvnbloom.create_empty(capacity=total, error_rate=0.01)
 
     for i in range(total):
         did = uuid.uuid4().hex
@@ -58,7 +58,7 @@ def test_save_load():
 
     try:
         bf.save(path)
-        bf_loaded = bfjs.load(path)
+        bf_loaded = fvnbloom.load(path)
 
         for did in uuids:
             assert did in bf_loaded
@@ -73,7 +73,7 @@ def test_error_rate():
     total = 10000
     uuids = []
 
-    bf = bfjs.create_empty(capacity=total, error_rate=0.01)
+    bf = fvnbloom.create_empty(capacity=total, error_rate=0.01)
 
     for i in range(total):
         did = uuid.uuid4().hex
